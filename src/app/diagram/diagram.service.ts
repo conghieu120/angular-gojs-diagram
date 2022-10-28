@@ -2,6 +2,7 @@ import { Injectable, Injector } from '@angular/core';
 import { Subject } from 'rxjs';
 import { data } from './data'
 import { TYPE_DIAGRAM } from './diagram.constant';
+import * as go from "gojs";
 
 export let InjectorInstance: Injector;
 
@@ -17,16 +18,18 @@ interface Idata {
 @Injectable({ providedIn: 'root' })
 export class ConfigDiagramService {
   data = new Subject<{type: String, data: Idata}>();
-  diagramData = new Subject();
-  onSaveDiagram = new Subject();
   dataConfig = {
     nodeDataArray: [...data.nodeDataArray],
     linkDataArray: [...data.linkDataArray],
   };
+  diagram: go.Diagram = new go.Diagram();
+
+  readonly onCreateNewDiagram = (diagram: go.Diagram) => {
+    this.diagram = diagram;
+  }
 
   constructor(private injector: Injector) {
     InjectorInstance = this.injector;
-    this.diagramData.subscribe(data => console.log(data))
   }
 
   openDiagramConfig(data: Idata, type: String) {
@@ -53,10 +56,7 @@ export class ConfigDiagramService {
     }
   }
 
-  exportDiagram(data: any) {
-    this.diagramData.next(data);
-  }
   onExportDiagram() {
-    this.onSaveDiagram.next('save');
+    console.log(this.diagram.model.toJson());
   }
 }

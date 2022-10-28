@@ -21,13 +21,12 @@ export function initDiagram(): go.Diagram {
   const configDiagramService = InjectorInstance.get(ConfigDiagramService);
 
   const dia = $(go.Diagram, {
-    'undoManager.isEnabled': true,
     model: new go.GraphLinksModel(
       {
         nodeKeyProperty: 'id',
         linkKeyProperty: 'id'
       }
-    ),
+      ),
     allowCopy: false,
     linkingTool: $(MessagingTool),  // defined below
     "resizingTool.isGridSnapEnabled": true,
@@ -73,6 +72,7 @@ export function initDiagram(): go.Diagram {
         }
       }
     },
+    'undoManager.isEnabled': true,
   });
 
   dia.groupTemplate =
@@ -117,6 +117,18 @@ export function initDiagram(): go.Diagram {
         new go.Binding("height", "duration", computeLifelineHeight)),
       {
         click: function(e, obj) {
+          console.log(obj)
+          // dia.model.addNodeData({
+          //   id: 'thdfjh',
+          //   text: 'hfgdhfdgh',
+          //   isGroup: true,
+          //   loc: '600 0',
+          //   duration: 9,
+          //   dataConfig: {
+          //     content: '',
+          //   },
+          // },)
+          // dia.model.removeNodeData(obj?.part?.data)
           configDiagramService.openDiagramConfig(obj?.part?.data, TYPE_DIAGRAM.GROUP)
         },
       }
@@ -190,10 +202,7 @@ export function initDiagram(): go.Diagram {
         },
       }
     );
-
-  configDiagramService.onSaveDiagram.subscribe(() => {
-    configDiagramService.exportDiagram(dia.model.toJson())
-  })
+  configDiagramService.onCreateNewDiagram(dia)
   return dia;
 }
 
@@ -226,28 +235,28 @@ class MessagingTool extends go.LinkingTool {
       const start = this.temporaryLink.zOrder;
       const duration = 1;
       newlink.data.zOrder = start;
+      newlink.data.duration = duration;
       model.setDataProperty(newlink.data, "text", "msg");
-      // and create a new Activity node data in the "to" group data
-      const newact = {
-        group: newlink.data.to,
-        start: start,
-        duration: duration
-      };
-      model.addNodeData(newact);
+      // and create a new Activity node data in the "to" group data => not use group
+      // const newact = {
+      //   group: newlink.data.to,
+      //   start: start,
+      //   duration: duration
+      // };
+      // model.addNodeData(newact);
       // now make sure all Lifelines are long enough
       // ensureLifelineHeights();
       const arr = model.nodeDataArray;
       let max = -1;
       for (let i = 0; i < arr.length; i++) {
         const act = arr[i];
-        if (act['isGroup']) continue;
-        max = Math.max(max, act['start'] + act['duration']);
+        max = Math.max(max, act['duration']) + 2;
       }
       if (max > 0) {
-        // now iterate over only Groups
         for (let i = 0; i < arr.length; i++) {
           const gr = arr[i];
-          if (!gr['isGroup']) continue;
+          console.log(gr)
+          // if (!gr['isGroup']) continue;
           if (max > gr['duration']) {  // this only extends, never shrinks
             model.setDataProperty(gr, "duration", max);
           }
@@ -291,7 +300,7 @@ class MessageDraggingTool extends go.DraggingTool {
         const cellY = this.gridSnapCellSize.height;
         y = Math.round(y / cellY) * cellY;  // snap to multiple of gridSnapCellSize.height
         const t = Math.max(0, convertYToTime(y));
-        link.diagram?.model.set(link.data, "time", t);
+        link.diagram?.model.set(link.data, "zOrder", t);
         link.invalidateRoute();
       }
     }

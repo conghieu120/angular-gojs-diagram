@@ -56,12 +56,6 @@ export const data: Idata = {
         content: '',
       },
     },
-    { group: 'Bob', start: 1, duration: 2 },
-    { group: 'Hank', start: 2, duration: 3 },
-    { group: 'Fred', start: 3, duration: 1 },
-    { group: 'Bob', start: 5, duration: 1 },
-    { group: 'Fred', start: 6, duration: 2 },
-    { group: 'Renee', start: 8, duration: 1 },
   ],
   linkDataArray: [
     { from: 'Fred', to: 'Bob', text: 'order', zOrder: 1, id: 1 },
