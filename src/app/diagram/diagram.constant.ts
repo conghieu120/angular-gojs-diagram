@@ -203,7 +203,10 @@ export function initDiagram(): go.Diagram {
         },
       }
     );
-  configDiagramService.onCreateNewDiagram(dia)
+  configDiagramService.onCreateNewDiagram(dia);
+  dia.addDiagramListener("BackgroundSingleClicked", () => {
+    configDiagramService.openDiagramConfig({})
+  })
   return dia;
 }
 

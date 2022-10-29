@@ -17,7 +17,7 @@ interface Idata {
 
 @Injectable({ providedIn: 'root' })
 export class ConfigDiagramService {
-  data = new Subject<{type: String, data: Idata}>();
+  data = new Subject<{type?: String, data?: Idata}>();
   dataConfig = {
     nodeDataArray: [...data.nodeDataArray],
     linkDataArray: [...data.linkDataArray],
@@ -32,15 +32,19 @@ export class ConfigDiagramService {
     InjectorInstance = this.injector;
   }
 
-  openDiagramConfig(data: Idata, type: String) {
-    if (type === TYPE_DIAGRAM.GROUP) {
-      const indexItem = this.dataConfig.nodeDataArray.findIndex(i => i?.id === data.id)
-      if (indexItem >= 0) {
-        this.data.next({ type: type, data: this.dataConfig.nodeDataArray[indexItem] });
-        return;
+  openDiagramConfig(data?: Idata, type?: String) {
+    if (!!data && !!type) {
+      if (type === TYPE_DIAGRAM.GROUP) {
+        const indexItem = this.dataConfig.nodeDataArray.findIndex(i => i?.id === data.id)
+        if (indexItem >= 0) {
+          this.data.next({ type: type, data: this.dataConfig.nodeDataArray[indexItem] });
+          return;
+        }
       }
+      this.data.next({ type: type, data: data });
+    } else {
+      this.data.next({});
     }
-    this.data.next({ type: type, data: data });
   }
 
   closeDiagramConfig() {
