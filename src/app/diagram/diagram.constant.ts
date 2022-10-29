@@ -1,5 +1,6 @@
 import * as go from "gojs";
 import { ConfigDiagramService, InjectorInstance } from "./diagram.service";
+import * as _ from "lodash";
 
 // some parameters
 export const LinePrefix = 20;  // vertical starting point in document for all Messages and Activations
@@ -246,20 +247,15 @@ class MessagingTool extends go.LinkingTool {
       // model.addNodeData(newact);
       // now make sure all Lifelines are long enough
       // ensureLifelineHeights();
+
+      const { linkDataArray } = JSON.parse(model.toJson());
+      const maxZorder = Math.max(...linkDataArray.map((o: { zOrder: any; }) => o.zOrder))
+
       const arr = model.nodeDataArray;
-      let max = -1;
-      for (let i = 0; i < arr.length; i++) {
-        const act = arr[i];
-        max = Math.max(max, act['duration']) + 2;
-      }
-      if (max > 0) {
+      if (maxZorder === newlink.part?.data.zOrder) {
         for (let i = 0; i < arr.length; i++) {
           const gr = arr[i];
-          console.log(gr)
-          // if (!gr['isGroup']) continue;
-          if (max > gr['duration']) {  // this only extends, never shrinks
-            model.setDataProperty(gr, "duration", max);
-          }
+          model.setDataProperty(gr, "duration", maxZorder );
         }
       }
     }

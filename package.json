@@ -20,6 +20,7 @@
     "@angular/router": "^14.2.6",
     "gojs": "^2.2.16",
     "gojs-angular": "^2.0.6",
+    "lodash": "^4.17.21",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
@@ -29,6 +30,7 @@
     "@angular/cli": "^14.2.6",
     "@angular/compiler-cli": "^14.2.6",
     "@types/jasmine": "~3.10.0",
+    "@types/lodash": "^4.14.186",
     "@types/node": "^12.11.1",
     "jasmine-core": "~4.0.0",
     "karma": "~6.3.0",
