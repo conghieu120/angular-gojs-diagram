@@ -1,12 +1,13 @@
 <div style="margin: auto; display: flex;">
   <div style="width: 15%; height: 50vh; background-color: #eee; padding: 24px;">
     <h1>service</h1>
+    <button *ngFor="let item of listNodeChoose">{{item.text}}</button>
   </div>
   <div style="width: 100%; height: 100vh">
     <gojs-diagram
       [initDiagram]='initDiagram'
-      [nodeDataArray]='data.nodeDataArray'
-      [linkDataArray]='data.linkDataArray'
+      [nodeDataArray]='nodeDataArray'
+      [linkDataArray]='linkDataArray'
       (modelChange)='diagramModelChange($event)'
       [divClassName]='diagramDivClassName'
     >
@@ -15,12 +16,12 @@
   <div style="width: 30%; height: 50vh; background-color: #eee; padding: 24px;">
     <h2>Config</h2>
 
-    <label *ngIf="dataConfig?.data">content</label>
-    <input *ngIf="dataConfig?.data" [(ngModel)]="content"/>
+    <label *ngIf="dataConfig">content</label>
+    <input *ngIf="dataConfig" [(ngModel)]="content"/>
 
-    <p>{{configDiagramService.data | async | json}}</p>
+    <p>{{diagramService.dataConfigSubject | async | json}}</p>
     <div>
-      <button  *ngIf="dataConfig?.data" (click)="onSave()">Save</button>
+      <button  *ngIf="dataConfig" (click)="onSave()">Save</button>
       <button  (click)="onExport()">Export</button>
     </div>
   </div>

@@ -3,26 +3,20 @@ import { Subject } from 'rxjs';
 import { data } from './data'
 import { TYPE_DIAGRAM } from './diagram.constant';
 import * as go from "gojs";
+import { ILinkData, INodeData } from './diagram.model';
 
 export let InjectorInstance: Injector;
 
-interface Idata {
-  id?: number | string;
-  dataConfig?: { content?: string},
-  text?: string;
-  isGroup?: boolean;
-  loc?: string;
-  duration?: number;
-}
-
 @Injectable({ providedIn: 'root' })
 export class ConfigDiagramService {
-  data = new Subject<{type?: String, data?: Idata}>();
-  dataConfig = {
-    nodeDataArray: [...data.nodeDataArray],
-    linkDataArray: [...data.linkDataArray],
-  };
+  dataConfigSubject = new Subject<{type?: String, data?: INodeData | ILinkData | null}>();
   diagram: go.Diagram = new go.Diagram();
+
+  nodes: INodeData[] = [];
+  links: ILinkData[] = [];
+
+  nodesSubject = new Subject<INodeData[]>();
+  linksSubject = new Subject<ILinkData[]>();
 
   readonly onCreateNewDiagram = (diagram: go.Diagram) => {
     this.diagram = diagram;
@@ -30,37 +24,44 @@ export class ConfigDiagramService {
 
   constructor(private injector: Injector) {
     InjectorInstance = this.injector;
+    this.nodesSubject.subscribe((data: INodeData[]) => {
+      this.nodes = data;
+    })
+    this.linksSubject.subscribe((data: ILinkData[]) => {
+      this.links = data;
+    })
   }
 
-  openDiagramConfig(data?: Idata, type?: String) {
-    if (!!data && !!type) {
-      if (type === TYPE_DIAGRAM.GROUP) {
-        const indexItem = this.dataConfig.nodeDataArray.findIndex(i => i?.id === data.id)
-        if (indexItem >= 0) {
-          this.data.next({ type: type, data: this.dataConfig.nodeDataArray[indexItem] });
-          return;
-        }
+  public fetchDiagramData = () => {
+    this.nodesSubject.next(data.nodeDataArray);
+    this.linksSubject.next(data.linkDataArray);
+  };
+
+  openDiagramConfig(data: INodeData | ILinkData, type: String) {
+    console.log(data)
+    if (type === TYPE_DIAGRAM.NODE) {
+      const indexItem = this.nodes.findIndex(i => i?.id === data.id)
+      if (indexItem >= 0) {
+        this.dataConfigSubject.next({ type: type, data: this.nodes[indexItem] });
+        return;
       }
-      this.data.next({ type: type, data: data });
-    } else {
-      this.data.next({});
     }
   }
 
   closeDiagramConfig() {
-    this.data.next({ type: '', data: {} });
+    this.dataConfigSubject.next({ type: '', data: null });
   }
 
   saveData(data: any, type: String, content: String) {
-    if (type === TYPE_DIAGRAM.GROUP) {
-      const indexItem = this.dataConfig.nodeDataArray.findIndex(i => i?.id === data.id)
+    if (type === TYPE_DIAGRAM.NODE) {
+      const indexItem = this.nodes.findIndex(i => i?.id === data.id)
       if (indexItem >= 0) {
-        this.dataConfig.nodeDataArray[indexItem] = {...data, dataConfig: {content}}
+        this.nodes[indexItem] = {...data, dataConfig: {content}}
       }
     }
   }
 
   onExportDiagram() {
-    console.log(this.diagram.model.toJson());
+    console.log(JSON.parse(this.diagram.model.toJson()));
   }
 }

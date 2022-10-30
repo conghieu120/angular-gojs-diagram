@@ -118,19 +118,7 @@ export function initDiagram(): go.Diagram {
         new go.Binding("height", "duration", computeLifelineHeight)),
       {
         click: function(e, obj) {
-          console.log(obj)
-          // dia.model.addNodeData({
-          //   id: 'thdfjh',
-          //   text: 'hfgdhfdgh',
-          //   isGroup: true,
-          //   loc: '600 0',
-          //   duration: 9,
-          //   dataConfig: {
-          //     content: '',
-          //   },
-          // },)
-          // dia.model.removeNodeData(obj?.part?.data)
-          configDiagramService.openDiagramConfig(obj?.part?.data, TYPE_DIAGRAM.GROUP)
+          configDiagramService.openDiagramConfig(obj?.part?.data, TYPE_DIAGRAM.NODE)
         },
       }
     );
@@ -205,7 +193,7 @@ export function initDiagram(): go.Diagram {
     );
   configDiagramService.onCreateNewDiagram(dia);
   dia.addDiagramListener("BackgroundSingleClicked", () => {
-    configDiagramService.openDiagramConfig({})
+    configDiagramService.closeDiagramConfig();
   })
   return dia;
 }
@@ -213,9 +201,6 @@ export function initDiagram(): go.Diagram {
 class MessagingTool extends go.LinkingTool {
   constructor() {
     super();
-
-    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-    // For details, see https://gojs.net/latest/intro/buildingObjects.html
     const $ = go.GraphObject.make;
     this.temporaryLink =
       $(MessageLink,
@@ -241,15 +226,6 @@ class MessagingTool extends go.LinkingTool {
       newlink.data.zOrder = start;
       newlink.data.duration = duration;
       model.setDataProperty(newlink.data, "text", "msg");
-      // and create a new Activity node data in the "to" group data => not use group
-      // const newact = {
-      //   group: newlink.data.to,
-      //   start: start,
-      //   duration: duration
-      // };
-      // model.addNodeData(newact);
-      // now make sure all Lifelines are long enough
-      // ensureLifelineHeights();
 
       const { linkDataArray } = JSON.parse(model.toJson());
       const maxZorder = Math.max(...linkDataArray.map((o: { zOrder: any; }) => o.zOrder))
@@ -267,14 +243,9 @@ class MessagingTool extends go.LinkingTool {
 }
 
 class MessageDraggingTool extends go.DraggingTool {
-  // override the standard behavior to include all selected Links,
-  // even if not connected with any selected Nodes
   override computeEffectiveCollection(parts: any, options: go.DraggingOptions) {
     const result = super.computeEffectiveCollection(parts, options);
-    // add a dummy Node so that the user can select only Links and move them all
     result.add(new go.Node(), new go.DraggingInfo(new go.Point()));
-    // normally this method removes any links not connected to selected nodes;
-    // we have to add them back so that they are included in the "parts" argument to moveParts
     parts.each((part: go.Part) => {
       if (part instanceof go.Link) {
         result.add(part, new go.DraggingInfo(part.getPoint(0).copy()));
@@ -283,7 +254,6 @@ class MessageDraggingTool extends go.DraggingTool {
     return result;
   }
 
-  // override to allow dragging when the selection only includes Links
   override mayMove() {
     return !this.diagram.isReadOnly && this.diagram.allowMove;
   }
